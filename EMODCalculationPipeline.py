@@ -160,8 +160,10 @@ class subject:
             s_snorm = meshTRIM_simply.face_normals
 
             # Saves nodes and faces!
-            np.save(self.Subj_folder + r'\vertices_simple.npy', self.vertices_simple)
-            np.save(self.Subj_folder + r'\faces_simple.npy', self.faces_simple)
+            np.save(os.path.join(self.Subj_folder, 'vertices_simple.npy'), self.vertices_simple)
+
+            np.save(os.path.join(self.Subj_folder, 'faces_simple.npy'), self.faces_simple)
+
 
             print('Done!')
 
@@ -171,7 +173,8 @@ class subject:
 
             print('Calculates normals in each node!')
             self.normals_simple = self.triangles2nodes(data_2_remap=s_snorm, normalize=True)
-            np.save(self.Subj_folder + r'\normals_simple.npy', self.normals_simple)
+            np.save(os.path.join(self.Subj_folder, 'normals_simple.npy'), self.normals_simple)
+
             print('Done!')
 
             print('Calculates dot products of normals (convenient for EMOD calculation)!')
@@ -192,7 +195,8 @@ class subject:
                 finish_vector = init_vector + dot_norm.shape[0] + 1
                 final_node = final_node + 1
 
-            np.save(self.Subj_folder + r'\dot_normals_half.npy', np.float32(normals_vector))
+            np.save(os.path.join(self.Subj_folder, 'dot_normals_half.npy'), np.float32(normals_vector))
+
 
             print('Done!')
 
@@ -217,19 +221,21 @@ class subject:
                 finish_vector = init_vector + dot_norm.shape[0] + 1
                 final_node = final_node + 1
 
-            np.save(self.Subj_folder + r'\dot_areas_half.npy', np.float32(areas_vector))
-            np.save(self.Subj_folder + r'\dot_areas_single_half.npy', np.float32(single_areas_vector))
+            np.save(os.path.join(self.Subj_folder, 'dot_areas_half.npy'), np.float32(areas_vector))
+            np.save(os.path.join(self.Subj_folder, 'dot_areas_single_half.npy'), np.float32(single_areas_vector))
+
 
             print('Done!')
 
             print('Saved simplified mesh and its attributes in subject folder!')
 
         else:
-            self.vertices_simple = np.load(self.Subj_folder + r'\vertices_simple.npy')
-            self.faces_simple = np.load(self.Subj_folder + r'\faces_simple.npy')
-            self.normals_simple = np.load(self.Subj_folder + r'\normals_simple.npy')
-            self.area_nodes_simple = np.load(self.Subj_folder + r'\area_per_node.npy')
-            self.area_faces_simple = np.load(self.Subj_folder + r'\area_per_face.npy')
+            self.vertices_simple = np.load(os.path.join(self.Subj_folder, 'vertices_simple.npy'))
+            self.faces_simple = np.load(os.path.join(self.Subj_folder, 'faces_simple.npy'))
+            self.normals_simple = np.load(os.path.join(self.Subj_folder, 'normals_simple.npy'))
+            self.area_nodes_simple = np.load(os.path.join(self.Subj_folder, 'area_per_node.npy'))
+            self.area_faces_simple = np.load(os.path.join(self.Subj_folder, 'area_per_face.npy'))
+
 
     def _DM_operation(self, iteration):
 
@@ -280,7 +286,8 @@ class subject:
                 final_node = final_node + 1
 
             # Saves matrix
-            np.save(self.Subj_folder + r'/dm_euclid_half.npy', np.float32(dm_vector))
+            np.save(os.path.join(self.Subj_folder, 'dm_euclid_half.npy'), np.float32(dm_vector))
+
 
             print('Euclidean distance matrix saved!')
         else:
@@ -345,7 +352,8 @@ class subject:
             print('Geodesic distance Matrix calculated after ' + str(t) + ' s')
             print('Saving Half Distance Matrix in subject folder, it may take some time...')
 
-            np.save(self.Subj_folder + r'\dm_geodesic_half.npy', np.float32(dm_vector))
+            np.save(os.path.join(self.Subj_folder, 'dm_geodesic_half.npy'), np.float32(dm_vector))
+
 
         else:
             print('Geodesic distance matrix already exists. Skipping calculation!')
@@ -392,7 +400,8 @@ class subject:
             self.area_faces_simple = np.power(np.multiply(np.multiply(np.multiply(s, (s - a)), (s - b)), (s - c)),1 / 2)
 
             # Saves face area
-            np.save(self.Subj_folder + r'\area_per_face.npy', self.area_faces_simple)
+            np.save(os.path.join(self.Subj_folder, 'area_per_face.npy'), self.area_faces_simple)
+
 
 
             # Area per node
@@ -405,11 +414,14 @@ class subject:
                 self.area_nodes_simple[i] = sum_areas / 3
                 area_tmp = []
 
-            np.save(self.Subj_folder + r'\area_per_node.npy', self.area_nodes_simple)
+            np.save(os.path.join(self.Subj_folder, 'area_per_node.npy'), self.area_nodes_simple)
+
 
         else:  # Loads the area info and updates the appropriate attribute
-            self.area_nodes_simple = np.load(self.Subj_folder + r'\area_per_node.npy')
-            self.area_faces_simple = np.load(self.Subj_folder + r'\area_per_face.npy')
+            self.area_nodes_simple = np.load(os.path.join(self.Subj_folder, 'area_per_node.npy'))
+
+
+            self.area_faces_simple = np.load(os.path.join(self.Subj_folder, 'area_per_face.npy'))
 
     def triangles2nodes(self, data_2_remap=[], normalize=False):
         " This function maps from triangle-defined-data to node-defined-data using weights given by the areas of the triangles."
@@ -469,7 +481,8 @@ class subject:
             title2plot = 'Area of each node (mm^2)'
             lim2plot = np.array([np.min(1/self.area_nodes_simple), np.max(1/self.area_nodes_simple)])
         elif data_2_plot == 'EMOD':
-            EMOD_half = np.load(self.Subj_folder + r'\EMOD_half.npy')
+            EMOD_half = np.load(os.path.join(self.Subj_folder, 'EMOD_half.npy'))
+
 
             # Number of mesh points
             n_points = len(self.vertices_simple)
@@ -536,7 +549,8 @@ class subject:
 
             if version == '1a':
                 # Areas in half matrix representation
-                areas_single_hm = np.load(self.Subj_folder + r'\dot_areas_single_half.npy')
+                areas_single_hm = np.load(os.path.join(self.Subj_folder, 'dot_areas_single_half.npy'))
+
         elif version == '2':
             print('Version of EMOD: ' + version)
             print('Lambda (mm/mm^2): ' + str(lambda_sc))
@@ -549,17 +563,22 @@ class subject:
             #Loads half matrices only required for this version of emod
 
             # Product of areas
-            areas_hm = np.load(self.Subj_folder + r'\dot_areas_half.npy')
+            areas_hm = np.load(os.path.join(self.Subj_folder, 'dot_areas_half.npy'))
+
 
             # Sum of mean curvatures
-            mean_curv_hm = np.load(self.Subj_folder + r'\mean_curv_sum.npy')
+            mean_curv_hm = np.load(os.path.join(self.Subj_folder, 'mean_curv_sum.npy'))
+
 
 
         #Loads Distance matrices
         #DM_geodesic = np.load(self.Subj_folder + r'\dm_geodesic_half.npy')
-        DM_euclid = np.load(self.Subj_folder + r'\dm_euclid_half.npy')
+        DM_euclid = np.load(os.path.join(self.Subj_folder, 'dm_euclid_half.npy'))
+
+
         #Loads normals dot product matrix
-        normals_hm = np.load(self.Subj_folder + r'\dot_normals_half.npy')
+        normals_hm = np.load(os.path.join(self.Subj_folder, 'dot_normals_half.npy'))
+
 
         # Calculates EMOD
         # Auxiliary terms
@@ -577,7 +596,8 @@ class subject:
             print('EMOD 1 value: ' + str(self.EMOD_sum*1000) + ' $\micro V$')
 
             #Saves EMOD mesh file (EMOD for each node of the simplified mesh)
-            np.save(self.Subj_folder + r'\EMOD_half.npy',np.float32(cim))
+            np.save(os.path.join(self.Subj_folder, 'EMOD_half.npy'),np.float32(cim))
+
 
 
         elif version == '1a':
@@ -589,7 +609,10 @@ class subject:
             print('EMOD 1a value: ' + str(self.EMOD_sum*1000) + ' $\micro V$')
 
             #Saves EMOD mesh file (EMOD for each node of the simplified mesh)
-            np.save(self.Subj_folder + r'\EMOD_half.npy',np.float32(cim))
+            np.save(os.path.join(self.Subj_folder, 'EMOD_half.npy'),np.float32(cim))
+
+
+
         elif version == '2':
             cim = k_const * (1 / DM_euclid ** 3) * np.abs(normals_hm) * areas_hm * np.exp(2*mean_curv_hm*DM_euclid)
             diag_zeros = np.where(np.logical_or(DM_euclid > l0, normals_hm > 0))
@@ -599,12 +622,14 @@ class subject:
             print('EMOD 2 value: ' + str(self.EMOD_sum * 1000) + ' $\micro V$')
 
             # Saves EMOD mesh file (EMOD for each node of the simplified mesh)
-            np.save(self.Subj_folder + r'\EMOD_half.npy', np.float32(cim))
+            np.save(os.path.join(self.Subj_folder, 'EMOD_half.npy'), np.float32(cim))
+
 
     def curvatures(self):
 
         #Mean curvature loaded if available!
-        self.mean_curv = np.load(self.Subj_folder + r'\mean_curv_simple.npy')
+        self.mean_curv = np.load(os.path.join(self.Subj_folder, 'mean_curv_simple.npy'))
+
 
         proceed = True
 
@@ -634,7 +659,8 @@ class subject:
                 finish_vector = init_vector + sum_curvs.shape[0] + 1
                 final_node = final_node + 1
 
-            np.save(self.Subj_folder + r'\mean_curv_sum.npy', np.float32(sum_curvs_hm))
+            np.save(os.path.join(self.Subj_folder, 'mean_curv_sum.npy'), np.float32(sum_curvs_hm))
+
 
 
 

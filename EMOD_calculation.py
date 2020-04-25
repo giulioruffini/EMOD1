@@ -6,7 +6,7 @@ import os
 
 if __name__ == '__main__':
     #Change your root folder and path as needed
-    root_folder = r'C:\Users\rnsal\Documents\Documents\Neuroelectrics\EMOD calculation standalone'
+    root_folder = r'.'
     subject_id_usr = os.path.join(root_folder, 'subjects folder','template_subject')
 
     #Reduces mesh to (1-reductions_ratio_usr)% of initial size
@@ -34,7 +34,8 @@ if __name__ == '__main__':
 
     # Calculates EMOD. Check documentation (https://www.biorxiv.org/content/10.1101/688101v1.full.pdf) for the meaning of the different inputs.
     subject_obj.calcEMOD(lambda_sc=1, p0=0.5, sigma=0.4, l0=5, version='1a')
-
-    #Plots desired quantity on the mesh
-    subject_obj.plot_data(data_2_plot='area')
+    print("EMOD computed!")
+    #Plots desired quantity on the mesh:
+    # subject_obj.plot_data(data_2_plot='area')
+    subject_obj.plot_data(data_2_plot='EMOD')
 
