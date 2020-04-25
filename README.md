@@ -1,4 +1,4 @@
-# EMOD calculation
+# EMOD calculation (Python 3)
 
 Calculation of EMOD index for a head model. The only required inputs are two lists: a list of vertices 
 (n_vertices x 3 txt file with the x, y and z coordinates of each vertex of the mesh) and a list of faces (m_faces x 3, indexing the positions in the vertices list of each point comprising the triangle).
@@ -11,7 +11,7 @@ Calculation of EMOD index for a head model. The only required inputs are two lis
 # Getting started
 This section will explain how to configure the software to use it locally in your computer.
 
-## Pre-requisites:
+## Pre-requisites (Python 3):
 You will need to install the following python toolboxes:
 
  
@@ -29,6 +29,11 @@ You will need to install the following python toolboxes:
  
 The generation of the original cortical surface is not done within these scripts. Surfaces generated with typical segmentation sofware (Freesurfer, Simnibs) are adequate provided they are converted to text files.
 Place the list of vertices/triangles inside a subject folder and rename them to: nodes_GM_full/faces_GM_full.txt.
+
+# Running the code
+ - the main script is EMOD_calculation.py
+ - run this script in Python 3 from the EMOD1 directory (working directory) 
+ - Close the Mayavi windows after each step to proceed
 
 # Todos
  - Implement other versions of EMOD
