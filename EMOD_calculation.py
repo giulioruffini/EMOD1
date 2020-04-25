@@ -33,7 +33,7 @@ if __name__ == '__main__':
     #subject_obj.curvatures()
 
     # Calculates EMOD. Check documentation (https://www.biorxiv.org/content/10.1101/688101v1.full.pdf) for the meaning of the different inputs.
-    #subject_obj.calcEMOD(lambda_sc=1, p0=0.5, sigma=0.4, l0=5, version='1a')
+    subject_obj.calcEMOD(lambda_sc=1, p0=0.5, sigma=0.4, l0=5, version='1a')
 
     #Plots desired quantity on the mesh
     subject_obj.plot_data(data_2_plot='area')
