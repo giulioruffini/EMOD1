@@ -21,19 +21,6 @@ Required libraries:
 -numpy
 -tvb-gdist
 -h5py
-
-
-The usual pipeline to work on subjects:
-1) import MeshProcessingPipeline as mpp
-2) mpp.SimplifyMeshSubj(): to generate simplified mesh and save in subj folder
-3) mpp.CalculateDM_gm()/mpp.CalculateDM_wm(): to generate DM_Half file and save
-                                              in subj folder
-4) mpp.ReduceGiu(): to generate the reduced and fixed .giu files associated to the simplified meshes
-                        (requires distance matriced in the subject folder)
-* mpp.ReconstructDM(): to load the selected distance matrix into workspace when needed
-* The only required data to start using this pipeline is the original giu files and the
-  meshes associated to the giu files. These must be in the subject folder.
-
 '''
 
 from multiprocessing import Pool
@@ -62,7 +49,7 @@ class subject:
         faces_full = np.loadtxt(os.path.join(self.Subj_folder, 'faces_GM_full.txt'))
         self.faces_full = faces_full[:, 0:3] - 1  # Removes 1 because faces index start from 1 in Matlab
 
-        vertices_full = np.loadtxt(self.Subj_folder + r'/nodes_GM_full.txt')
+        vertices_full = np.loadtxt(os.path.join(self.Subj_folder,'nodes_GM_full.txt'))
         self.vertices_full = vertices_full[:, 0:3]
 
         self.faces_simple = []  # faces of the simplified mesh
@@ -93,8 +80,8 @@ class subject:
 
         proceed = True
 
-        if os.path.isfile((self.Subj_folder + r'\vertices_simple.npy')) and os.path.isfile(
-                (self.Subj_folder + r'\faces_simple.npy')):
+        if os.path.isfile(os.path.join(self.Subj_folder, 'vertices_simple.npy')) and\
+                os.path.isfile(os.path.join(self.Subj_folder,'faces_simple.npy')):
             print('Simplified mesh already exists, do you want to re-calculate?')
             proceed_ = input("Yes(y)/No(n): ")
 
@@ -108,7 +95,7 @@ class subject:
             # Plot the final reduced mesh
 
             if self.quiet == 0:
-                print('Loaded mesh')
+                print('Loaded mesh. Close window to proceed!')
                 mlab.triangular_mesh(self.vertices_full[:, 0], self.vertices_full[:, 1], self.vertices_full[:, 2],
                                      self.faces_full)
                 mlab.show()
@@ -141,7 +128,7 @@ class subject:
             faces_simple = repaired.f
             if self.quiet == 0:
                 # Plot the final reduced mesh
-                print('Check the mesh')
+                print('Check the mesh! Close the window to proceed!')
                 mlab.triangular_mesh(vertices_simple[:, 0], vertices_simple[:, 1], vertices_simple[:, 2], faces_simple)
                 mlab.show()
 
@@ -163,7 +150,6 @@ class subject:
             np.save(os.path.join(self.Subj_folder, 'vertices_simple.npy'), self.vertices_simple)
 
             np.save(os.path.join(self.Subj_folder, 'faces_simple.npy'), self.faces_simple)
-
 
             print('Done!')
 
@@ -468,18 +454,22 @@ class subject:
             data2plot = self.normals_simple[:,0]
             title2plot = 'x component of the vector normal to the surface'
             lim2plot = np.array([-1, 1])
+            print('Plotting x component of normal vector!')
         elif data_2_plot == 'normals_y':
             data2plot = self.normals_simple[:,0]
             title2plot = 'y component of the vector normal to the surface'
             lim2plot = np.array([-1, 1])
+            print('Plotting y component of normal vector!')
         elif data_2_plot == 'normals_z':
             data2plot = self.normals_simple[:,0]
             title2plot = 'z component of the vector normal to the surface'
             lim2plot = np.array([-1, 1])
+            print('Plotting z component of normal vector!')
         elif data_2_plot == 'area':
-            data2plot = 1/self.area_nodes_simple
+            data2plot = self.area_nodes_simple
             title2plot = 'Area of each node (mm^2)'
-            lim2plot = np.array([np.min(1/self.area_nodes_simple), np.max(1/self.area_nodes_simple)])
+            lim2plot = np.array([np.min(self.area_nodes_simple), np.max(self.area_nodes_simple)])
+            print('Plotting area of mesh elements (per node)!')
         elif data_2_plot == 'EMOD':
             EMOD_half = np.load(os.path.join(self.Subj_folder, 'EMOD_half.npy'))
 
@@ -508,6 +498,8 @@ class subject:
 
             title2plot = 'EMOD index ($\micro V$)'
             lim2plot = np.array([0, self.EMOD_sum*1000])
+
+            print('Plotting EMOD!')
         elif data_2_plot == 'mean_curv':
             data2plot = self.mean_curv
             title2plot = 'Mean curvature (mm^-1)'
@@ -531,6 +523,8 @@ class subject:
 
         mlab.view(azimuth=360, elevation=0, distance=None, focalpoint=None, roll=None, reset_roll=True, figure=None)
 
+        print('Close window to proceed!')
+
         mlab.show()
 
     def calcEMOD(self,lambda_sc = 1, p0 = 0.5, sigma = 0.4, l0 = 1, version = '1'):
@@ -541,9 +535,9 @@ class subject:
         if version == '1' or version == '1a':
             print('Version of EMOD: ' + version)
             print('Lambda (mm): ' + str(lambda_sc))
-            print('Dipole moment surface density ($nA*m/mm^2$): ' + str(p0))
-            print('Electrical conductivity of GM ($S/m$): ' + str(sigma))
-            print('Nearest neighbors distance threshold ($mm$): ' + str(l0))
+            print('Dipole moment surface density (nA*m/mm^2): ' + str(p0))
+            print('Electrical conductivity of GM (S/m): ' + str(sigma))
+            print('Nearest neighbors distance threshold (mm): ' + str(l0))
 
             k_const = lambda_sc * p0 / (2 * np.pi * sigma)  # It will calculate everything in mV
 
@@ -554,9 +548,9 @@ class subject:
         elif version == '2':
             print('Version of EMOD: ' + version)
             print('Lambda (mm/mm^2): ' + str(lambda_sc))
-            print('Dipole moment surface density ($nA*m/mm^2$): ' + str(p0))
-            print('Electrical conductivity of GM ($S/m$): ' + str(sigma))
-            print('Nearest neighbors distance threshold ($mm$): ' + str(l0))
+            print('Dipole moment surface density (nA*m/mm^2): ' + str(p0))
+            print('Electrical conductivity of GM (S/m): ' + str(sigma))
+            print('Nearest neighbors distance threshold (mm): ' + str(l0))
 
             k_const = lambda_sc * p0 / (2 * np.pi * sigma)  # It will calculate everything in mV
 
@@ -593,7 +587,7 @@ class subject:
             cim[diag_zeros] = 0
             cim[diag_zeros_euclid] = 0
             self.EMOD_sum = 2*np.sum(cim)/n_points
-            print('EMOD 1 value: ' + str(self.EMOD_sum*1000) + ' $\micro V$')
+            print('EMOD 1 value: ' + "{0:.4g}".format(self.EMOD_sum*1000) + ' microV')
 
             #Saves EMOD mesh file (EMOD for each node of the simplified mesh)
             np.save(os.path.join(self.Subj_folder, 'EMOD_half.npy'),np.float32(cim))
@@ -606,8 +600,7 @@ class subject:
             cim[diag_zeros] = 0
             cim[diag_zeros_euclid] = 0
             self.EMOD_sum = 2*np.sum(cim)/n_points
-            print('EMOD 1a value: ' + str(self.EMOD_sum*1000) + ' $\micro V$')
-
+            print('EMOD 1a value: ' + "{0:.4g}".format(self.EMOD_sum*1000) + ' microV')
             #Saves EMOD mesh file (EMOD for each node of the simplified mesh)
             np.save(os.path.join(self.Subj_folder, 'EMOD_half.npy'),np.float32(cim))
 
@@ -619,7 +612,7 @@ class subject:
             cim[diag_zeros] = 0
             cim[diag_zeros_euclid] = 0
             self.EMOD_sum = 2 * np.sum(cim) / n_points
-            print('EMOD 2 value: ' + str(self.EMOD_sum * 1000) + ' $\micro V$')
+            print('EMOD 2 value: ' + "{0:.4g}".format(self.EMOD_sum * 1000) + ' microV')
 
             # Saves EMOD mesh file (EMOD for each node of the simplified mesh)
             np.save(os.path.join(self.Subj_folder, 'EMOD_half.npy'), np.float32(cim))
